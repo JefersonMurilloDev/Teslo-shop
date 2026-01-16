@@ -41,8 +41,13 @@ Configurar las variables de entorno en el archivo `.env`
 ```bash
 docker-compose up -d
 ```
+### 5. Ejecutar SEED
 
-### 5. Ejecutar la aplicación
+```postman GET
+http://localhost:3000/api/seed
+```
+
+### 6. Ejecutar la aplicación
 
 ```bash
 # desarrollo
