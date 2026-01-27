@@ -3,11 +3,13 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ProductImage } from './product-image.entity';
 import { Transform } from 'class-transformer';
+import { User } from 'src/auth/entities/user.entity';
 
 @Entity({ name: 'products' })
 export class Product {
@@ -57,6 +59,7 @@ export class Product {
     default: [],
   })
   tags: string[];
+
   //images
   @OneToMany(() => ProductImage, (productImage) => productImage.product, {
     cascade: true,
@@ -67,6 +70,10 @@ export class Product {
       value?.map((img) => img.url) ?? [],
   )
   images?: ProductImage[];
+
+  //user
+  @ManyToOne(() => User, (user) => user.products, { eager: true })
+  user: User;
 
   private normalizeSlug() {
     if (!this.slug) {
