@@ -6,7 +6,8 @@ postgres/
 .windsurf/
 static/
 .agents/
-
+postman/
+.postman/
 # Logs
 logs
 *.log

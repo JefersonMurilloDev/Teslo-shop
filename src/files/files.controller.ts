@@ -8,19 +8,23 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FilesService } from './files.service';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { fileFilter, fileNamer } from './helpers';
 import { diskStorage } from 'multer';
+import { FilesService } from './files.service';
 
 import type { Response } from 'express';
 
+@ApiTags('Files - Get and Upload')
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Post('product')
+  @ApiResponse({ status: 201, description: 'File uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid file type' })
   @UseInterceptors(
     FileInterceptor('file', {
       fileFilter: fileFilter,
@@ -41,6 +45,8 @@ export class FilesController {
   }
 
   @Get('product/:imageName')
+  @ApiResponse({ status: 200, description: 'Image returned' })
+  @ApiResponse({ status: 404, description: 'Image not found' })
   findProductImage(
     @Res() res: Response,
     @Param('imageName') imageName: string,
