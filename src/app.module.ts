@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 import { ProductsModule } from './products/products.module';
 import { SeedModule } from './seed/seed.module';
@@ -14,6 +16,15 @@ import { MessagesWsModule } from './messages-ws/messages-ws.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    // Rate Limiting: máximo 60 requests por minuto por IP
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 segundos en milisegundos
+        limit: 60,  // 60 requests por minuto (1 por segundo promedio)
+      },
+    ]),
+
     TypeOrmModule.forRoot({
       ssl: process.env.STAGE === 'prod',
       type: 'postgres',
@@ -23,7 +34,7 @@ import { MessagesWsModule } from './messages-ws/messages-ws.module';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: process.env.STAGE !== 'prod',
     }),
     ProductsModule,
     SeedModule,
@@ -31,5 +42,11 @@ import { MessagesWsModule } from './messages-ws/messages-ws.module';
     AuthModule,
     MessagesWsModule,
   ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule { }
